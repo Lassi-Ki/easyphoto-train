@@ -447,3 +447,5 @@ def download_dataset_from_s3(s3uri, path):
         bucket.download_file(obj.key, target)
 
 
+def down_sd_model(s3uri):
+    pass

@@ -1,7 +1,6 @@
 import argparse
 import torch
 import os
-import base64
 from easyphoto.easyphoto_train import easyphoto_train_forward
 from easyphoto.easyphoto_down import download_dataset_from_s3
 
@@ -36,12 +35,11 @@ def training():
         print(f'download dataset from s3: {opt.s3Url} success.')
 
     img_list = os.listdir(user_path)
-    encoded_images = []
+    instance_images = []
     for idx, img_path in enumerate(img_list):
         img_path = os.path.join(user_path, img_path)
-        with open(img_path, "rb") as f:
-            encoded_image = base64.b64encode(f.read()).decode("utf-8")
-            encoded_images.append(encoded_image)
+        instance_images.append(img_path)
+
     try:
         message = easyphoto_train_forward(
             sd_model_checkpoint=opt.sd_model_checkpoint,
@@ -58,7 +56,7 @@ def training():
             learning_rate=opt.learning_rate,
             rank=opt.rank,
             network_alpha=opt.network_alpha,
-            instance_images=encoded_images,
+            instance_images=instance_images,
             skin_retouching_bool=opt.skin_retouching_bool,
             training_prefix_prompt=opt.training_prefix_prompt,
             crop_ratio=opt.crop_ratio
@@ -66,6 +64,7 @@ def training():
     except Exception as e:
         torch.cuda.empty_cache()
         message = f"Train error, error info:{str(e)}"
+        print(message)
     return {"message": message}
 
 

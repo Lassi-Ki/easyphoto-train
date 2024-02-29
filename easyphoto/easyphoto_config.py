@@ -1,4 +1,17 @@
 import os
+import boto3
+
+
+region_name = boto3.session.Session().region_name
+s3_client = boto3.client('s3', region_name=region_name)
+generated_lora_s3uri = os.environ.get('generated_lora_s3uri', 's3://sagemaker-us-west-2-011299426194/easyphoto_lora/')
+
+def get_bucket_and_key(s3uri):
+    pos = s3uri.find('/', 5)
+    bucket = s3uri[5 : pos]
+    key = s3uri[pos + 1 : ]
+    return bucket, key
+
 
 
 # save_dirs
@@ -6,7 +19,7 @@ data_dir = "./"
 data_path = data_dir
 
 models_path = '/tmp/models'
-easyphoto_models_path = os.path.abspath(os.path.dirname(__file__)).replace("scripts", "models")
+easyphoto_models_path = os.path.join(data_path, "models")
 
 easyphoto_outpath_samples = os.path.join(data_dir, "outputs/easyphoto-outputs")
 user_id_outpath_samples = os.path.join(data_dir, "outputs/easyphoto-user-id-infos")
@@ -58,4 +71,4 @@ DEFAULT_CLOTH_LORA = ["demo_black_200", "demo_white_200", "demo_purple_200", "de
 DEFAULT_SLIDERS = ["age_sd1_sliders", "smiling_sd1_sliders", "age_sdxl_sliders", "smiling_sdxl_sliders"]
 
 # ModelName
-SDXL_MODEL_NAME = "SDXL_1.0_ArienMixXL_v2.0.safetensors"
+SDXL_MODEL_NAME = "sd_xl_base_1.0.safetensors"

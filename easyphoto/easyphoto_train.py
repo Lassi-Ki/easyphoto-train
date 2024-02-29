@@ -14,8 +14,8 @@ from easyphoto.easyphoto_config import (
         validation_prompt,
         validation_prompt_scene,
 )
-from easyphoto_down import check_files_exists_and_download
-from easyphoto.easyphoto_config import data_dir
+from easyphoto.easyphoto_down import check_files_exists_and_download#, down_sd_model
+from easyphoto.easyphoto_config import data_dir, get_bucket_and_key, generated_lora_s3uri, s3_client
 
 
 
@@ -94,11 +94,9 @@ def easyphoto_train_forward(
     weights_save_path = os.path.join(cache_outpath_samples, unique_id, "user_weights")
     webui_save_path = os.path.join(models_path, f"Lora/{unique_id}.safetensors")
     webui_load_path = os.path.join(models_path, f"Stable-diffusion", sd_model_checkpoint)
-    sd_save_path = os.path.join(easyphoto_models_path, "stable-diffusion-v1-5")
-    if sdxl_pipeline_flag:
-        sd_save_path = sd_save_path.replace("stable-diffusion-v1-5",
-                                            "stable-diffusion-xl/stabilityai_stable_diffusion_xl_base_1.0")
+    sd_save_path = os.path.join(easyphoto_models_path, "stable-diffusion-xl/stabilityai_stable_diffusion_xl_base_1.0")
 
+    # down_sd_model()
     os.makedirs(original_backup_path, exist_ok=True)
     os.makedirs(user_path, exist_ok=True)
     os.makedirs(images_save_path, exist_ok=True)
@@ -113,7 +111,7 @@ def easyphoto_train_forward(
         instance_images = [instance[0] for instance in instance_images]
 
     for index, user_image in enumerate(instance_images):
-        image = Image.open(user_image["name"])
+        image = Image.open(user_image)
         image = ImageOps.exif_transpose(image).convert("RGB")
         image.save(os.path.join(original_backup_path, str(index) + ".jpg"))
     
@@ -160,16 +158,12 @@ def easyphoto_train_forward(
 
     # Extra arguments to run SDXL training.
     env = None
-    if sdxl_pipeline_flag:
-        original_config = config_sdxl
-        sdxl_model_dir = os.path.abspath(os.path.dirname(__file__)).replace("scripts", "models/stable-diffusion-xl")
-        pretrained_vae_model_name_or_path = os.path.join(sdxl_model_dir, "madebyollin_sdxl_vae_fp16_fix")
-        # SDXL training requires some config files in openai/clip-vit-large-patch14 and laion/CLIP-ViT-bigG-14-laion2B-39B-b160k.
-        # We provide them in extensions/EasyPhoto/models. Thus, we need set some environment variables for transformers.
-        # if we pass `env` in subprocess.run, the environment variables in the child process will be reset and different from Web UI.
-        env = os.environ.copy()
-        env["TRANSFORMERS_OFFLINE"] = "1"
-        env["TRANSFORMERS_CACHE"] = sdxl_model_dir
+    original_config = config_sdxl
+    sdxl_model_dir = os.path.join(easyphoto_models_path, "stable-diffusion-xl")
+    pretrained_vae_model_name_or_path = os.path.join(sdxl_model_dir, "madebyollin_sdxl_vae_fp16_fix")
+    env = os.environ.copy()
+    env["TRANSFORMERS_OFFLINE"] = "1"
+    env["TRANSFORMERS_CACHE"] = sdxl_model_dir
 
     # unload_models()
 
@@ -232,20 +226,22 @@ def easyphoto_train_forward(
     if not os.path.exists(best_weight_path):
         return "Failed to obtain Lora after training, please check the training process."
 
-    copyfile(best_weight_path, webui_save_path)
-    # TODO: 将训练好的 lora 模型上传到 S3 （注意路径在 user_id 文件夹下）
-    # post_lora(best_weight_path, user_id, unique_id)
+    # copyfile(best_weight_path, webui_save_path)
+    try:
+        post_lora(best_weight_path, user_id, unique_id)
+    except Exception as e:
+        return f"Error uploading the LoRA to S3: {e}"
 
     return "The training has been completed."
 
 
-# def post_lora(lora_path, user_id, unique_id):
-#     bucket, key = shared.get_bucket_and_key(shared.generated_lora_s3uri)
-#     if key.endswith('/'):
-#         key = key[:-1]
-#     key += "/" + user_id
-#     shared.s3_client.put_object(
-#         Body=open(lora_path, 'rb'),
-#         Bucket=bucket,
-#         Key=f'{key}/{unique_id}.safetensors'
-#     )
+def post_lora(lora_path, user_id, unique_id):
+    bucket, key = get_bucket_and_key(generated_lora_s3uri)
+    if key.endswith('/'):
+        key = key[:-1]
+    key += "/" + user_id
+    s3_client.put_object(
+        Body=open(lora_path, 'rb'),
+        Bucket=bucket,
+        Key=f'{key}/{unique_id}.safetensors'
+    )
