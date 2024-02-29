@@ -457,4 +457,4 @@ def down_sd_model(s3uri, path):
     key = s3uri[pos + 1:]
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(bucket)
-    bucket.download_file(key, path)
+    bucket.download_file(key, os.path.join(path, os.path.basename(key)))
