@@ -14,7 +14,7 @@ from easyphoto.easyphoto_config import (
         validation_prompt,
         validation_prompt_scene,
 )
-from easyphoto.easyphoto_down import check_files_exists_and_download#, down_sd_model
+from easyphoto.easyphoto_down import check_files_exists_and_download, down_sd_model
 from easyphoto.easyphoto_config import data_dir, get_bucket_and_key, generated_lora_s3uri, s3_client
 
 
@@ -26,6 +26,7 @@ check_hash = {}
 
 
 def easyphoto_train_forward(
+    sd_model_s3_path: str,
     sd_model_checkpoint: str,
     user_id: str,
     unique_id: str,
@@ -96,7 +97,7 @@ def easyphoto_train_forward(
     webui_load_path = os.path.join(models_path, f"Stable-diffusion", sd_model_checkpoint)
     sd_save_path = os.path.join(easyphoto_models_path, "stable-diffusion-xl/stabilityai_stable_diffusion_xl_base_1.0")
 
-    # down_sd_model()
+    down_sd_model(sd_model_s3_path, os.path.join(models_path, f"Stable-diffusion"))
     os.makedirs(original_backup_path, exist_ok=True)
     os.makedirs(user_path, exist_ok=True)
     os.makedirs(images_save_path, exist_ok=True)

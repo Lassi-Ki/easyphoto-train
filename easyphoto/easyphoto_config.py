@@ -13,7 +13,6 @@ def get_bucket_and_key(s3uri):
     return bucket, key
 
 
-
 # save_dirs
 data_dir = "./"
 data_path = data_dir

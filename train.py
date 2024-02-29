@@ -7,6 +7,7 @@ from easyphoto.easyphoto_down import download_dataset_from_s3
 
 parser = argparse.ArgumentParser(description='Train a model')
 parser.add_argument('--s3Url', type=str, default="")
+parser.add_argument('--sd_model_s3_path', type=str, default="")
 parser.add_argument('--sd_model_checkpoint', type=str, default="sd_xl_base_1.0.safetensors")
 parser.add_argument('--user_id', type=str, default="test")
 parser.add_argument('--unique_id', type=str, default="test_00")
@@ -42,6 +43,7 @@ def training():
 
     try:
         message = easyphoto_train_forward(
+            sd_model_s3_path=opt.sd_model_s3_path,
             sd_model_checkpoint=opt.sd_model_checkpoint,
             user_id=opt.user_id,
             unique_id=opt.unique_id,

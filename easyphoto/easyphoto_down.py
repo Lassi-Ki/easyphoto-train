@@ -447,5 +447,14 @@ def download_dataset_from_s3(s3uri, path):
         bucket.download_file(obj.key, target)
 
 
-def down_sd_model(s3uri):
-    pass
+def down_sd_model(s3uri, path):
+    if path is not None:
+        # 如果文件夹不存在就创建它
+        if not os.path.exists(path):
+            os.makedirs(path)
+    pos = s3uri.find('/', 5)
+    bucket = s3uri[5: pos]
+    key = s3uri[pos + 1:]
+    s3 = boto3.resource('s3')
+    bucket = s3.Bucket(bucket)
+    bucket.download_file(key, path)
