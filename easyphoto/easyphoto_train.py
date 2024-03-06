@@ -15,7 +15,7 @@ from easyphoto.easyphoto_config import (
         validation_prompt_scene,
 )
 from easyphoto.easyphoto_down import check_files_exists_and_download, down_sd_model
-from easyphoto.easyphoto_config import data_dir, get_bucket_and_key, generated_lora_s3uri, s3_client
+from easyphoto.easyphoto_config import data_dir, get_bucket_and_key, generated_lora_s3uri, s3_client, generated_ref_s3uri
 
 
 
@@ -230,6 +230,7 @@ def easyphoto_train_forward(
     # copyfile(best_weight_path, webui_save_path)
     try:
         post_lora(best_weight_path, user_id, unique_id)
+        post_ref(ref_image_path, user_id, unique_id)
     except Exception as e:
         return f"Error uploading the LoRA to S3: {e}"
 
@@ -245,4 +246,15 @@ def post_lora(lora_path, user_id, unique_id):
         Body=open(lora_path, 'rb'),
         Bucket=bucket,
         Key=f'{key}/{unique_id}.safetensors'
+    )
+
+def post_ref(ref_path, user_id, unique_id):
+    bucket, key = get_bucket_and_key(generated_ref_s3uri)
+    if key.endswith('/'):
+        key = key[:-1]
+    key += "/" + user_id + "/" + unique_id
+    s3_client.put_object(
+        Body=open(ref_path, 'rb'),
+        Bucket=bucket,
+        Key=f'{key}/ref_image.jpg'
     )
