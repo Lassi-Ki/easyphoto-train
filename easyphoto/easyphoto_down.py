@@ -440,6 +440,9 @@ def download_dataset_from_s3(s3uri, path):
     bucket = s3.Bucket(bucket)
     for obj in bucket.objects.filter(Prefix=key):
         target = obj.key if path is None else os.path.join(path, os.path.relpath(obj.key, key))
+        # 过滤掉非图片文件
+        if not target.endswith(('.jpg', '.jpeg', '.png')):
+            continue
         if not os.path.exists(os.path.dirname(target)):
             os.makedirs(os.path.dirname(target))
         if obj.key[-1] == '/':
