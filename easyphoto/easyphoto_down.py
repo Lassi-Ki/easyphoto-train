@@ -428,25 +428,25 @@ def check_files_exists_and_download(check_hash, download_mode="base"):
 
 
 def download_dataset_from_s3(s3uri, path):
-    if path is not None:
-        # 如果文件夹不存在就创建它
-        if not os.path.exists(path):
-            os.makedirs(path)
+    if not os.path.exists(path):
+        os.makedirs(path)
     pos = s3uri.find('/', 5)
     bucket = s3uri[5: pos]
     key = s3uri[pos + 1:]
+    print("bucket:", bucket)
+    print("key:", key)
 
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(bucket)
     for obj in bucket.objects.filter(Prefix=key):
-        target = obj.key if path is None else os.path.join(path, os.path.relpath(obj.key, key))
-        # 过滤掉非图片文件
+        if obj.key[-1] == '/':
+            continue
+        target = os.path.join(path, os.path.relpath(obj.key, key))
+        print("target:", target)
         if not target.endswith(('.jpg', '.jpeg', '.png')):
             continue
         if not os.path.exists(os.path.dirname(target)):
             os.makedirs(os.path.dirname(target))
-        if obj.key[-1] == '/':
-            continue
         bucket.download_file(obj.key, target)
 
 

@@ -34,6 +34,9 @@ def training():
     if opt.s3Url != '':
         download_dataset_from_s3(opt.s3Url, user_path)
         print(f'download dataset from s3: {opt.s3Url} success.')
+    else:
+        print(f'The dataset is empty.')
+        return f'The dataset is empty.'
 
     img_list = os.listdir(user_path)
     instance_images = []
