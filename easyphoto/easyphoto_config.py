@@ -18,7 +18,7 @@ def get_bucket_and_key(s3uri):
 data_dir = "./"
 data_path = data_dir
 
-models_path = '/tmp/models'
+models_path = os.path.join(data_dir, "XL-models")
 easyphoto_models_path = os.path.join(data_path, "models")
 
 easyphoto_outpath_samples = os.path.join(data_dir, "outputs/easyphoto-outputs")

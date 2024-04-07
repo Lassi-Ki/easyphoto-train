@@ -2,7 +2,8 @@ import argparse
 import torch
 import os
 from easyphoto.easyphoto_train import easyphoto_train_forward
-from easyphoto.easyphoto_down import download_dataset_from_s3
+from easyphoto.easyphoto_down import download_dataset_from_s3, check_files_exists_and_download, down_sd_model
+from easyphoto.easyphoto_train import models_path
 
 
 parser = argparse.ArgumentParser(description='Train a model')
@@ -29,6 +30,11 @@ parser.add_argument('--crop_ratio', type=float, default=3)
 opt = parser.parse_args()
 
 
+def download_model_from_s3(sd_model_s3_path):
+    down_sd_model(sd_model_s3_path, os.path.join(models_path, f"Stable-diffusion"))
+    check_files_exists_and_download(True, "sdxl")
+
+
 def training():
     user_path = f'./datasets/{opt.user_id}/{opt.unique_id}'
     if opt.s3Url != '':
@@ -43,6 +49,7 @@ def training():
     for idx, img_path in enumerate(img_list):
         img_path = os.path.join(user_path, img_path)
         instance_images.append(img_path)
+    print("instance_images: ", instance_images)
 
     try:
         message = easyphoto_train_forward(

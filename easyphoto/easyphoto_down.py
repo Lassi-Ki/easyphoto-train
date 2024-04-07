@@ -452,7 +452,6 @@ def download_dataset_from_s3(s3uri, path):
 
 def down_sd_model(s3uri, path):
     if path is not None:
-        # 如果文件夹不存在就创建它
         if not os.path.exists(path):
             os.makedirs(path)
     pos = s3uri.find('/', 5)
