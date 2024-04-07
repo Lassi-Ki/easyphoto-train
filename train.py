@@ -30,12 +30,13 @@ parser.add_argument('--crop_ratio', type=float, default=3)
 opt = parser.parse_args()
 
 
-def download_model_from_s3(sd_model_s3_path):
-    down_sd_model(sd_model_s3_path, os.path.join(models_path, f"Stable-diffusion"))
+def download_model_from_s3():
+    down_sd_model(opt.sd_model_s3_path, os.path.join(models_path, f"Stable-diffusion"))
     check_files_exists_and_download(True, "sdxl")
 
 
 def training():
+    download_model_from_s3()
     user_path = f'./datasets/{opt.user_id}/{opt.unique_id}'
     if opt.s3Url != '':
         download_dataset_from_s3(opt.s3Url, user_path)
