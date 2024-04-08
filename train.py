@@ -2,7 +2,7 @@ import argparse
 import torch
 import os
 from easyphoto.easyphoto_train import easyphoto_train_forward
-from easyphoto.easyphoto_down import download_dataset_from_s3, check_files_exists_and_download, down_sd_model
+from easyphoto.easyphoto_down import download_dataset_from_s3, down_easyphoto_model, down_sd_model
 from easyphoto.easyphoto_train import models_path
 
 
@@ -32,7 +32,7 @@ opt = parser.parse_args()
 
 def download_model_from_s3():
     down_sd_model(opt.sd_model_s3_path, os.path.join(models_path, f"Stable-diffusion"))
-    check_files_exists_and_download(True, "sdxl")
+    down_easyphoto_model()
 
 
 def training():
