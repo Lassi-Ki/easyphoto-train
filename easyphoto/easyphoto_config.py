@@ -4,8 +4,8 @@ import boto3
 
 region_name = boto3.session.Session().region_name
 s3_client = boto3.client('s3', region_name=region_name)
-generated_lora_s3uri = os.environ.get('generated_lora_s3uri', 's3://sagemaker-us-west-2-011299426194/easyphoto_lora/')
-generated_ref_s3uri = os.environ.get('generated_ref_s3uri', 's3://sagemaker-us-west-2-011299426194/easyphoto_ref/')
+generated_lora_s3uri = os.environ.get('generated_lora_s3uri', 's3://sagemaker-us-west-2-108991587548/easyphoto_lora/')
+generated_ref_s3uri = os.environ.get('generated_ref_s3uri', 's3://sagemaker-us-west-2-108991587548/easyphoto_ref/')
 
 def get_bucket_and_key(s3uri):
     pos = s3uri.find('/', 5)
