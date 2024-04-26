@@ -17,22 +17,6 @@ else:
     controlnet_annotator_cache_path = os.path.join(models_annotator_path, "annotator/downloads/openpose")
 
 download_urls = {
-    # The models are from civitai/6424 & civitai/118913, we saved them to oss for your convenience in downloading the models.
-    "portrait": [
-        # controlnet annotator
-        "https://pai-aigc-photog.oss-cn-hangzhou.aliyuncs.com/webui/body_pose_model.pth",
-        "https://pai-aigc-photog.oss-cn-hangzhou.aliyuncs.com/webui/facenet.pth",
-        "https://pai-aigc-photog.oss-cn-hangzhou.aliyuncs.com/webui/hand_pose_model.pth",
-        # other models
-        "https://pai-aigc-photog.oss-cn-hangzhou.aliyuncs.com/webui/face_skin.pth",
-        "https://pai-aigc-photog.oss-cn-hangzhou.aliyuncs.com/webui/face_landmarks.pth",
-        "https://pai-aigc-photog.oss-cn-hangzhou.aliyuncs.com/webui/makeup_transfer.pth",
-        # templates
-        "https://pai-aigc-photog.oss-cn-hangzhou.aliyuncs.com/webui/1.jpg",
-        "https://pai-aigc-photog.oss-cn-hangzhou.aliyuncs.com/webui/2.jpg",
-        "https://pai-aigc-photog.oss-cn-hangzhou.aliyuncs.com/webui/3.jpg",
-        "https://pai-aigc-photog.oss-cn-hangzhou.aliyuncs.com/webui/4.jpg",
-    ],
     "sdxl": [
         # sdxl
         "https://pai-aigc-photog.oss-cn-hangzhou.aliyuncs.com/webui/madebyollin_sdxl_vae_fp16_fix/diffusion_pytorch_model.safetensors",
@@ -41,22 +25,6 @@ download_urls = {
 }
 
 save_filenames = {
-    # The models are from civitai/6424 & civitai/118913, we saved them to oss for your convenience in downloading the models.
-    "portrait": [
-        # controlnet annotator
-        os.path.join(controlnet_annotator_cache_path, f"body_pose_model.pth"),
-        os.path.join(controlnet_annotator_cache_path, f"facenet.pth"),
-        os.path.join(controlnet_annotator_cache_path, f"hand_pose_model.pth"),
-        # other models
-        os.path.join(easyphoto_models_path, "face_skin.pth"),
-        os.path.join(easyphoto_models_path, "face_landmarks.pth"),
-        os.path.join(easyphoto_models_path, "makeup_transfer.pth"),
-        # templates
-        os.path.join(easyphoto_models_path, "training_templates", "1.jpg"),
-        os.path.join(easyphoto_models_path, "training_templates", "2.jpg"),
-        os.path.join(easyphoto_models_path, "training_templates", "3.jpg"),
-        os.path.join(easyphoto_models_path, "training_templates", "4.jpg"),
-    ],
     "sdxl": [
         os.path.join(easyphoto_models_path, "stable-diffusion-xl/madebyollin_sdxl_vae_fp16_fix/diffusion_pytorch_model.safetensors"),
         os.path.join(models_path, f"VAE/madebyollin-sdxl-vae-fp16-fix.safetensors"),
@@ -125,18 +93,22 @@ def download_dataset_from_s3(s3uri, path):
 
 
 def down_sd_model(s3uri, path):
-    if path is not None:
-        if not os.path.exists(path):
-            os.makedirs(path)
+    if not os.path.exists(path):
+        os.makedirs(path)
+
     pos = s3uri.find('/', 5)
     bucket = s3uri[5: pos]
     key = s3uri[pos + 1:]
+
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(bucket)
+
     bucket.download_file(key, os.path.join(path, os.path.basename(key)))
-    print("download xl base model successfully.")
+    if "vae" in s3uri:
+        print("download vae model successfully.")
+    else:
+        print("download xl base model successfully.")
 
 
 def down_easyphoto_model():
-    check_files_exists_and_download(True, "portrait")
     check_files_exists_and_download(True, "sdxl")
