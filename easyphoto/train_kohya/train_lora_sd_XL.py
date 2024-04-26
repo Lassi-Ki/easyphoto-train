@@ -1143,8 +1143,6 @@ def main():
 
         if args.validation:
             log_validation(args, accelerator, weight_dtype, network, global_step)
-        # TODO: Model selection.
-
         # we will remove cache_log_file after train
         with open(args.cache_log_file, "w") as _:
             pass

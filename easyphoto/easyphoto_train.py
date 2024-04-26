@@ -173,7 +173,7 @@ def easyphoto_train_forward(
 
     best_weight_path = os.path.join(weights_save_path, "pytorch_lora_weights.safetensors")
     if not os.path.exists(best_weight_path):
-        return "Failed to obtain Lora after training, please check the training process."
+        print("Failed to obtain Lora after training, please check the training process.")
 
     # -------------------------------------------------------------------------------------
     # ----------------------------  阶段四  训练结果上传  ------------------------------------
@@ -182,7 +182,7 @@ def easyphoto_train_forward(
         post_lora(best_weight_path, user_id, unique_id)
         post_ref(ref_image_path, user_id, unique_id)
     except Exception as e:
-        return f"Error uploading the LoRA to S3: {e}"
+        print(f"Error uploading the LoRA to S3: {e}")
 
     return "The training has been completed."
 
