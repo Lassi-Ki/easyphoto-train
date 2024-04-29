@@ -14,25 +14,27 @@ def download_model_from_s3():
 
 
 def training():
-    download_model_from_s3()
-    user_path = f'./datasets/{opt.user_id}/{opt.unique_id}'
-    if opt.s3Url != '':
-        download_dataset_from_s3(opt.s3Url, user_path)
-        print(f'download dataset from s3: {opt.s3Url} success.')
-    else:
-        print(f'The dataset is empty.')
-        return f'The dataset is empty.'
+    # download_model_from_s3()
+    # user_path = f'./datasets/{opt.user_id}/{opt.unique_id}'
+    # if opt.s3Url != '':
+    #     download_dataset_from_s3(opt.s3Url, user_path)
+    #     print(f'download dataset from s3: {opt.s3Url} success.')
+    # else:
+    #     print(f'The dataset is empty.')
+    #     return f'The dataset is empty.'
 
-    img_list = os.listdir(user_path)
+    img_list = os.listdir("/opt/ml/input/data/images/")
     instance_images = []
     for idx, img_path in enumerate(img_list):
-        img_path = os.path.join(user_path, img_path)
+        img_path = os.path.join("/opt/ml/input/data/images/", img_path)
         instance_images.append(img_path)
     print("instance_images: ", instance_images)
 
     try:
         message = easyphoto_train_forward(
-            sd_model_s3_path=opt.sd_model_s3_path,
+            # sd_model_s3_path=opt.sd_model_s3_path,
+            sd_save_path=opt.sd_save_path,
+            output_dir=opt.output_dir,
             sd_model_checkpoint=opt.sd_model_checkpoint,
             user_id=opt.user_id,
             unique_id=opt.unique_id,
@@ -61,10 +63,13 @@ def training():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Train a model')
-    parser.add_argument('--s3Url', type=str, default="")
-    parser.add_argument('--sd_model_s3_path', type=str, default="")
+    # parser.add_argument('--s3Url', type=str, default="")
+    # parser.add_argument('--sd_model_s3_path', type=str, default="")
     parser.add_argument('--sd_model_checkpoint', type=str, default="sd_xl_base_1.0.safetensors")
-    parser.add_argument('--vae_model_s3_path', type=str, default="")
+    # parser.add_argument('--vae_model_s3_path', type=str, default="")
+    parser.add_argument('--sd_save_path', type=str,
+                        default="/opt/ml/input/data/models/sd_xl_base_1.0.safetensors")
+    parser.add_argument('--output_dir', type=str, default="/opt/ml/model/")
 
     parser.add_argument('--user_id', type=str, default="test")
     parser.add_argument('--unique_id', type=str, default="test_00")
@@ -73,7 +78,7 @@ if __name__ == "__main__":
     parser.add_argument('--val_and_checkpointing_steps', type=int, default=100)
     parser.add_argument('--max_train_steps', type=int, default=400)
     parser.add_argument('--steps_per_photos', type=int, default=200)
-    parser.add_argument('--train_batch_size', type=int, default=1)
+    parser.add_argument('--train_batch_size', type=int, default=2)
     parser.add_argument('--gradient_accumulation_steps', type=int, default=4)
     parser.add_argument('--dataloader_num_workers', type=int, default=16)
     parser.add_argument('--learning_rate', type=float, default=1e-4)

@@ -130,6 +130,11 @@ def log_validation(args, accelerator, weight_dtype, network, global_step):
 def parse_args():
     parser = argparse.ArgumentParser(description="Simple example of a training script.")
     parser.add_argument(
+        "--unique_id",
+        type=str,
+        required=True
+    )
+    parser.add_argument(
         "--pretrained_model_name_or_path",
         type=str,
         required=True,
@@ -1135,11 +1140,11 @@ def main():
     # Save the lora layers
     accelerator.wait_for_everyone()
     if accelerator.is_main_process:
-        safetensor_save_path = os.path.join(args.output_dir, f"pytorch_lora_weights.safetensors")
+        safetensor_save_path = os.path.join(args.output_dir, f"{args.unique_id}.safetensors")
         accelerator_save_path = os.path.join(args.output_dir, f"pytorch_lora_weights")
         save_model(safetensor_save_path, accelerator.unwrap_model(network))
-        if args.save_state:
-            accelerator.save_state(accelerator_save_path)
+        # if args.save_state:
+        #     accelerator.save_state(accelerator_save_path)
 
         if args.validation:
             log_validation(args, accelerator, weight_dtype, network, global_step)

@@ -22,6 +22,8 @@ python_executable_path = sys.executable
 
 def easyphoto_train_forward(
     sd_model_s3_path: str,
+    output_dir,
+    sd_save_path: str,
     sd_model_checkpoint: str,
     user_id: str,
     unique_id: str,
@@ -70,7 +72,7 @@ def easyphoto_train_forward(
     weights_save_path = os.path.join(cache_outpath_samples, unique_id, "user_weights")
     webui_save_path = os.path.join(models_path, f"Lora/{unique_id}.safetensors")
     webui_load_path = os.path.join(models_path, f"Stable-diffusion", sd_model_checkpoint)
-    sd_save_path = os.path.join(easyphoto_models_path, "stable-diffusion-xl/stabilityai_stable_diffusion_xl_base_1.0")
+    # sd_save_path = os.path.join(easyphoto_models_path, "stable-diffusion-xl/stabilityai_stable_diffusion_xl_base_1.0")
 
     os.makedirs(original_backup_path, exist_ok=True)
     os.makedirs(user_path, exist_ok=True)
@@ -121,7 +123,8 @@ def easyphoto_train_forward(
     if not os.path.exists(os.path.dirname(cache_log_file_path)):
         os.makedirs(os.path.dirname(cache_log_file_path), exist_ok=True)
     sdxl_model_dir = os.path.join(easyphoto_models_path, "stable-diffusion-xl")
-    pretrained_vae_model_name_or_path = os.path.join(sdxl_model_dir, "madebyollin_sdxl_vae_fp16_fix")
+    # pretrained_vae_model_name_or_path = os.path.join(sdxl_model_dir, "madebyollin_sdxl_vae_fp16_fix")
+    pretrained_vae_model_name_or_path = "/opt/ml/input/data/models/sd_xl_base_1.0_vae.safetensors"
     env = os.environ.copy()
     env["TRANSFORMERS_OFFLINE"] = "1"
     env["TRANSFORMERS_CACHE"] = sdxl_model_dir
@@ -134,7 +137,7 @@ def easyphoto_train_forward(
         "--main_process_port=3456",
         f"{train_kohya_path}",
         f"--pretrained_model_name_or_path={sd_save_path}",
-        f"--pretrained_model_ckpt={webui_load_path}",
+        f"--pretrained_model_ckpt={sd_save_path}",
         f"--train_data_dir={user_path}",
         "--caption_column=text",
         f"--resolution={resolution}",
@@ -162,6 +165,7 @@ def easyphoto_train_forward(
         "--merge_best_lora_based_face_id",
         f"--merge_best_lora_name={unique_id}",
         f"--cache_log_file={cache_log_file_path}",
+        f"--unique_id={unique_id}",
     ]
     command += [f"--original_config={config_sdxl}"]
     command += [f"--pretrained_vae_model_name_or_path={pretrained_vae_model_name_or_path}"]
@@ -171,15 +175,11 @@ def easyphoto_train_forward(
     except subprocess.CalledProcessError as e:
         print(f"Error executing the command: {e}")
 
-    best_weight_path = os.path.join(weights_save_path, "pytorch_lora_weights.safetensors")
-    if not os.path.exists(best_weight_path):
-        print("Failed to obtain Lora after training, please check the training process.")
-
     # -------------------------------------------------------------------------------------
     # ----------------------------  阶段四  训练结果上传  ------------------------------------
     # -------------------------------------------------------------------------------------
     try:
-        post_lora(best_weight_path, user_id, unique_id)
+        # post_lora(best_weight_path, user_id, unique_id)
         post_ref(ref_image_path, user_id, unique_id)
     except Exception as e:
         print(f"Error uploading the LoRA to S3: {e}")
