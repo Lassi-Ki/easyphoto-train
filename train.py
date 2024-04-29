@@ -33,7 +33,7 @@ def training():
     try:
         message = easyphoto_train_forward(
             # sd_model_s3_path=opt.sd_model_s3_path,
-            sd_save_path=opt.sd_save_path,
+            webui_load_path=opt.webui_load_path,
             output_dir=opt.output_dir,
             sd_model_checkpoint=opt.sd_model_checkpoint,
             user_id=opt.user_id,
@@ -67,7 +67,7 @@ if __name__ == "__main__":
     # parser.add_argument('--sd_model_s3_path', type=str, default="")
     parser.add_argument('--sd_model_checkpoint', type=str, default="sd_xl_base_1.0.safetensors")
     # parser.add_argument('--vae_model_s3_path', type=str, default="")
-    parser.add_argument('--sd_save_path', type=str,
+    parser.add_argument('--webui_load_path', type=str,
                         default="/opt/ml/input/data/models/sd_xl_base_1.0.safetensors")
     parser.add_argument('--output_dir', type=str, default="/opt/ml/model/")
 

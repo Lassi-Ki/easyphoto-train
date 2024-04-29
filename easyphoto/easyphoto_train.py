@@ -23,7 +23,7 @@ python_executable_path = sys.executable
 def easyphoto_train_forward(
     # sd_model_s3_path: str,
     output_dir,
-    sd_save_path: str,
+    webui_load_path: str,
     sd_model_checkpoint: str,
     user_id: str,
     unique_id: str,
@@ -71,8 +71,8 @@ def easyphoto_train_forward(
     # Training weight saving
     weights_save_path = os.path.join(cache_outpath_samples, unique_id, "user_weights")
     webui_save_path = os.path.join(models_path, f"Lora/{unique_id}.safetensors")
-    webui_load_path = os.path.join(models_path, f"Stable-diffusion", sd_model_checkpoint)
-    # sd_save_path = os.path.join(easyphoto_models_path, "stable-diffusion-xl/stabilityai_stable_diffusion_xl_base_1.0")
+    # webui_load_path = os.path.join(models_path, f"Stable-diffusion", sd_model_checkpoint)
+    sd_save_path = os.path.join(easyphoto_models_path, "stable-diffusion-xl/stabilityai_stable_diffusion_xl_base_1.0")
 
     os.makedirs(original_backup_path, exist_ok=True)
     os.makedirs(user_path, exist_ok=True)
@@ -137,7 +137,7 @@ def easyphoto_train_forward(
         "--main_process_port=3456",
         f"{train_kohya_path}",
         f"--pretrained_model_name_or_path={sd_save_path}",
-        f"--pretrained_model_ckpt={sd_save_path}",
+        f"--pretrained_model_ckpt={webui_load_path}",
         f"--train_data_dir={user_path}",
         "--caption_column=text",
         f"--resolution={resolution}",
