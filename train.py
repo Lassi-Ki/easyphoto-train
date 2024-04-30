@@ -8,8 +8,8 @@ from easyphoto.easyphoto_config import easyphoto_models_path
 
 
 def download_model_from_s3():
-    down_sd_model(opt.sd_model_s3_path, os.path.join(models_path, f"Stable-diffusion"))
-    down_sd_model(opt.vae_model_s3_path, os.path.join(os.path.join(easyphoto_models_path, "stable-diffusion-xl"),
+    down_sd_model("", os.path.join(models_path, f"Stable-diffusion"))
+    down_sd_model("", os.path.join(os.path.join(easyphoto_models_path, "stable-diffusion-xl"),
                                                       "madebyollin_sdxl_vae_fp16_fix"))
 
 
@@ -32,10 +32,6 @@ def training():
 
     try:
         message = easyphoto_train_forward(
-            # sd_model_s3_path=opt.sd_model_s3_path,
-            webui_load_path=opt.webui_load_path,
-            output_dir=opt.output_dir,
-            sd_model_checkpoint=opt.sd_model_checkpoint,
             user_id=opt.user_id,
             unique_id=opt.unique_id,
             train_mode_choose=opt.train_mode_choose,
@@ -63,14 +59,7 @@ def training():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Train a model')
-    # parser.add_argument('--s3Url', type=str, default="")
-    # parser.add_argument('--sd_model_s3_path', type=str, default="")
     parser.add_argument('--sd_model_checkpoint', type=str, default="sd_xl_base_1.0.safetensors")
-    # parser.add_argument('--vae_model_s3_path', type=str, default="")
-    parser.add_argument('--webui_load_path', type=str,
-                        default="/opt/ml/input/data/models/sd_xl_base_1.0.safetensors")
-    parser.add_argument('--output_dir', type=str, default="/opt/ml/model/")
-
     parser.add_argument('--user_id', type=str, default="test")
     parser.add_argument('--unique_id', type=str, default="test_00")
     parser.add_argument('--train_mode_choose', type=str, default="Train Human Lora")

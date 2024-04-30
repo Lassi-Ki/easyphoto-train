@@ -22,10 +22,6 @@ python_executable_path = sys.executable
 
 
 def easyphoto_train_forward(
-    # sd_model_s3_path: str,
-    output_dir,
-    webui_load_path: str,
-    sd_model_checkpoint: str,
     user_id: str,
     unique_id: str,
     train_mode_choose: str,
@@ -72,7 +68,7 @@ def easyphoto_train_forward(
     # Training weight saving
     weights_save_path = os.path.join(cache_outpath_samples, unique_id, "user_weights")
     webui_save_path = os.path.join(models_path, f"Lora/{unique_id}.safetensors")
-    # webui_load_path = os.path.join(models_path, f"Stable-diffusion", sd_model_checkpoint)
+    webui_load_path = os.path.join(models_path, f"Stable-diffusion", "sd_xl_base_1.0.safetensors")
     sd_save_path = os.path.join(easyphoto_models_path, "stable-diffusion-xl/stabilityai_stable_diffusion_xl_base_1.0")
 
     os.makedirs(original_backup_path, exist_ok=True)
@@ -87,6 +83,20 @@ def easyphoto_train_forward(
         image = Image.open(user_image)
         image = ImageOps.exif_transpose(image).convert("RGB")
         image.save(os.path.join(original_backup_path, str(index) + ".jpg"))
+
+    filenames = os.listdir("/opt/ml/input/data/models/")
+    for filename in filenames:
+        print(filename)
+
+    os.makedirs(os.path.join(easyphoto_models_path, "stable-diffusion-xl", "madebyollin_sdxl_vae_fp16_fix/"),
+                exist_ok=True)
+    os.makedirs(os.path.join(models_path, f"Stable-diffusion/"),
+                exist_ok=True)
+
+    shutil.move("/opt/ml/input/data/models/diffusion_pytorch_model.safetensors",
+                os.path.join(easyphoto_models_path, "stable-diffusion-xl", "madebyollin_sdxl_vae_fp16_fix/diffusion_pytorch_model.safetensors"))
+    shutil.move("/opt/ml/input/data/models/sd_xl_base_1.0.safetensors",
+                os.path.join(models_path, f"Stable-diffusion/sd_xl_base_1.0.safetensors"))
 
     # -------------------------------------------------------------------------------------
     # --------------------------  阶段二  训练图像预处理  -------------------------------------
@@ -125,9 +135,6 @@ def easyphoto_train_forward(
         os.makedirs(os.path.dirname(cache_log_file_path), exist_ok=True)
     sdxl_model_dir = os.path.join(easyphoto_models_path, "stable-diffusion-xl")
     pretrained_vae_model_name_or_path = os.path.join(sdxl_model_dir, "madebyollin_sdxl_vae_fp16_fix")
-    # pretrained_vae_model_name_or_path = "/opt/ml/input/data/models/sd_xl_base_1.0_vae.safetensors"
-    shutil.move("/opt/ml/input/data/models/diffusion_pytorch_model.safetensors",
-                os.path.join(easyphoto_models_path, "stable-diffusion-xl", "madebyollin_sdxl_vae_fp16_fix/diffusion_pytorch_model.safetensors"))
     env = os.environ.copy()
     env["TRANSFORMERS_OFFLINE"] = "1"
     env["TRANSFORMERS_CACHE"] = sdxl_model_dir
