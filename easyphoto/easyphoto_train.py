@@ -1,6 +1,7 @@
 import os
 import subprocess
 import sys
+import shutil
 import numpy as np
 from glob import glob
 from PIL import Image, ImageOps
@@ -123,8 +124,10 @@ def easyphoto_train_forward(
     if not os.path.exists(os.path.dirname(cache_log_file_path)):
         os.makedirs(os.path.dirname(cache_log_file_path), exist_ok=True)
     sdxl_model_dir = os.path.join(easyphoto_models_path, "stable-diffusion-xl")
-    # pretrained_vae_model_name_or_path = os.path.join(sdxl_model_dir, "madebyollin_sdxl_vae_fp16_fix")
-    pretrained_vae_model_name_or_path = "/opt/ml/input/data/models/sd_xl_base_1.0_vae.safetensors"
+    pretrained_vae_model_name_or_path = os.path.join(sdxl_model_dir, "madebyollin_sdxl_vae_fp16_fix")
+    # pretrained_vae_model_name_or_path = "/opt/ml/input/data/models/sd_xl_base_1.0_vae.safetensors"
+    shutil.move("/opt/ml/input/data/models/diffusion_pytorch_model.safetensors",
+                os.path.join(easyphoto_models_path, "stable-diffusion-xl", "madebyollin_sdxl_vae_fp16_fix/diffusion_pytorch_model.safetensors"))
     env = os.environ.copy()
     env["TRANSFORMERS_OFFLINE"] = "1"
     env["TRANSFORMERS_CACHE"] = sdxl_model_dir
