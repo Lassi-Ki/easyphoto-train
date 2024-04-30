@@ -21,7 +21,6 @@ python_executable_path = sys.executable
 
 
 def easyphoto_train_forward(
-    sd_model_s3_path: str,
     sd_model_checkpoint: str,
     user_id: str,
     unique_id: str,
