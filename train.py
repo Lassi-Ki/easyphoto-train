@@ -1,5 +1,6 @@
 import argparse
 import torch
+import shutil
 import os
 from easyphoto.easyphoto_train import easyphoto_train_forward
 from easyphoto.easyphoto_down import download_dataset_from_s3, down_sd_model
@@ -14,15 +15,27 @@ def download_model_from_s3():
 
 
 def training():
-    download_model_from_s3()
-    user_path = f'./datasets/{opt.user_id}/{opt.unique_id}'
-    if opt.s3Url != '':
-        download_dataset_from_s3(opt.s3Url, user_path)
-        print(f'download dataset from s3: {opt.s3Url} success.')
-    else:
-        print(f'The dataset is empty.')
-        return f'The dataset is empty.'
+    # download_model_from_s3()
+    # user_path = f'./datasets/{opt.user_id}/{opt.unique_id}'
+    # if opt.s3Url != '':
+    #     download_dataset_from_s3(opt.s3Url, user_path)
+    #     print(f'download dataset from s3: {opt.s3Url} success.')
+    # else:
+    #     print(f'The dataset is empty.')
+    #     return f'The dataset is empty.'
 
+    # 1. 准备模型
+    os.makedirs(os.path.join(models_path, f"Stable-diffusion"), exist_ok=True)
+    os.makedirs(os.path.join(os.path.join(easyphoto_models_path, "stable-diffusion-xl"),
+                            "madebyollin_sdxl_vae_fp16_fix"), exist_ok=True)
+    shutil.move("/opt/ml/input/data/models/sd_xl_base_1.0.safetensors",
+                os.path.join(models_path, f"Stable-diffusion/sd_xl_base_1.0.safetensors"))
+    shutil.move("/opt/ml/input/data/models/diffusion_pytorch_model.safetensors",
+                os.path.join(os.path.join(easyphoto_models_path, "stable-diffusion-xl"),
+                             "madebyollin_sdxl_vae_fp16_fix/diffusion_pytorch_model.safetensors"))
+
+    # 2. 准备数据
+    user_path = "/opt/ml/input/data/images/"
     img_list = os.listdir(user_path)
     instance_images = []
     for idx, img_path in enumerate(img_list):
